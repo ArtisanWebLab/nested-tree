@@ -9,7 +9,6 @@ class NestedTreeServiceProvider extends ServiceProvider
 {
     /**
      * Register the service provider.
-     * @return void
      */
     public function register()
     {
@@ -20,9 +19,8 @@ class NestedTreeServiceProvider extends ServiceProvider
 
     /**
      * Returns the default database driver, not just the connection name.
-     * @return string
      */
-    protected function getDefaultDatabaseDriver()
+    protected function getDefaultDatabaseDriver(): string
     {
         $defaultConnection = $this->app['db']->getDefaultConnection();
         return $this->app['config']['database.connections.' . $defaultConnection . '.driver'];

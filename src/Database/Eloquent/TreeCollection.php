@@ -6,22 +6,19 @@ use Illuminate\Database\Eloquent\Collection;
 
 /**
  * Custom collection used by NestedTree trait.
- *
  * General access methods:
- *
  *   $collection->toNested(); // Converts collection to an eager loaded one.
- *
  */
 class TreeCollection extends Collection
 {
-
     /**
      * Converts a flat collection of nested set models to an set where
-     * children is eager loaded
+     * children are eager loaded
+     *
      * @param bool $removeOrphans Remove nodes that exist without their parents.
      * @return Collection
      */
-    public function toNested($removeOrphans = true)
+    public function toNested(bool $removeOrphans = true): Collection
     {
         /*
          * Set new collection for "children" relations
@@ -43,8 +40,7 @@ class TreeCollection extends Collection
             if (array_key_exists($parentKey, $collection)) {
                 $collection[$parentKey]->children[] = $model;
                 $nestedKeys[] = $model->getKey();
-            }
-            elseif ($removeOrphans) {
+            } elseif ($removeOrphans) {
                 $nestedKeys[] = $model->getKey();
             }
         }
@@ -61,12 +57,13 @@ class TreeCollection extends Collection
 
     /**
      * Gets an array with values of a given column. Values are indented according to their depth.
-     * @param  string $value  Array values
-     * @param  string $key    Array keys
-     * @param  string $indent Character to indent depth
+     *
+     * @param string      $value  Array values
+     * @param string|null $key    Array keys
+     * @param string      $indent Character to indent depth
      * @return array
      */
-    public function listsNested($value, $key = null, $indent = '&nbsp;&nbsp;&nbsp;')
+    public function listsNested(string $value, string $key = null, string $indent = '&nbsp;&nbsp;&nbsp;'): array
     {
         /*
          * Recursive helper function
@@ -79,8 +76,7 @@ class TreeCollection extends Collection
             foreach ($items as $item) {
                 if ($key !== null) {
                     $result[$item->{$key}] = $indentString . $item->{$value};
-                }
-                else {
+                } else {
                     $result[] = $indentString . $item->{$value};
                 }
 

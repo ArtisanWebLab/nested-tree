@@ -2,11 +2,11 @@
 
 namespace ArtisanWebLab\NestedTree\Support\Facades;
 
+use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Facades\Facade;
 
-
 /**
- * @method static mixed raw(string $sql)
+ * @method static Expression raw(string $sql)
  * @method static string parse(string $sql)
  * @method static string parseGroupConcat(string $sql)
  * @method static string parseConcat(string $sql)
@@ -17,8 +17,6 @@ use Illuminate\Support\Facades\Facade;
  * @method static void disableStrictMode()
  * @method static string getDriver()
  * @method static string getTablePrefix()
- *
- * @see \ArtisanWebLab\NestedTree\Database\Dongle
  */
 class DbDongle extends Facade
 {

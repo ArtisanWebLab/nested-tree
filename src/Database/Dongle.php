@@ -2,6 +2,9 @@
 
 namespace ArtisanWebLab\NestedTree\Database;
 
+use Illuminate\Database\DatabaseManager;
+use Illuminate\Database\Query\Expression;
+
 /**
  * Database driver dongle
  *
@@ -9,27 +12,22 @@ namespace ArtisanWebLab\NestedTree\Database;
  */
 class Dongle
 {
-    /**
-     * @var \Illuminate\Database\DatabaseManager Database helper object
-     */
-    protected $db;
+    protected DatabaseManager $db;
 
     /**
      * @var string Driver to convert to: mysql, sqlite, pgsql, sqlsrv, postgis.
      */
-    protected $driver;
+    protected string $driver;
 
     /**
      * @var bool Used to determine whether strict mode has been disabled.
      */
-    protected $strictModeDisabled;
+    protected bool $strictModeDisabled;
 
     /**
      * Constructor.
-     * @param string $driver
-     * @param \Illuminate\Database\DatabaseManager $db
      */
-    public function __construct($driver = 'mysql', $db = null)
+    public function __construct(string $driver = 'mysql', DatabaseManager $db = null)
     {
         $this->db = $db;
         $this->driver = $driver;
@@ -37,20 +35,16 @@ class Dongle
 
     /**
      * Transforms and executes a raw SQL statement
-     * @param  string $sql
-     * @return mixed
      */
-    public function raw($sql)
+    public function raw(string $sql): Expression
     {
         return $this->db->raw($this->parse($sql));
     }
 
     /**
      * Transforms an SQL statement to match the active driver.
-     * @param  string $sql
-     * @return string
      */
-    public function parse($sql)
+    public function parse(string $sql): string
     {
         $sql = $this->parseGroupConcat($sql);
         $sql = $this->parseConcat($sql);
@@ -61,10 +55,8 @@ class Dongle
 
     /**
      * Transforms GROUP_CONCAT statement.
-     * @param  string $sql
-     * @return string
      */
-    public function parseGroupConcat($sql)
+    public function parseGroupConcat(string $sql): string
     {
         $result = preg_replace_callback('/group_concat\((.+)\)/i', function ($matches) {
             if (!isset($matches[1])) {
@@ -101,10 +93,8 @@ class Dongle
 
     /**
      * Transforms CONCAT statement.
-     * @param  string $sql
-     * @return string
      */
-    public function parseConcat($sql)
+    public function parseConcat(string $sql): string
     {
         return preg_replace_callback('/(?:group_)?concat\((.+)\)(?R)?/i', function ($matches) {
             if (!isset($matches[1])) {
@@ -133,10 +123,8 @@ class Dongle
 
     /**
      * Transforms IFNULL statement.
-     * @param  string $sql
-     * @return string
      */
-    public function parseIfNull($sql)
+    public function parseIfNull(string $sql): string
     {
         if ($this->driver == 'pgsql' || $this->driver == 'postgis') {
             return str_ireplace('ifnull(', 'coalesce(', $sql);
@@ -151,10 +139,8 @@ class Dongle
 
     /**
      * Transforms true|false expressions in a statement.
-     * @param  string $sql
-     * @return string
      */
-    public function parseBooleanExpression($sql)
+    public function parseBooleanExpression(string $sql): string
     {
         if ($this->driver != 'sqlite') {
             return $sql;
@@ -170,10 +156,8 @@ class Dongle
 
     /**
      * Some drivers require same-type comparisons.
-     * @param  string $sql
-     * @return string
      */
-    public function cast($sql, $asType = 'INTEGER')
+    public function cast(string $sql, string $asType = 'INTEGER'): string
     {
         if ($this->driver != 'pgsql' && $this->driver != 'postgis') {
             return $sql;
@@ -184,14 +168,13 @@ class Dongle
 
     /**
      * Alters a table's TIMESTAMP field(s) to be nullable and converts existing values.
-     *
      * This is needed to transition from older Laravel code that set DEFAULT 0, which is an
      * invalid date in newer MySQL versions where NO_ZERO_DATE is included in strict mode.
      *
-     * @param string        $table
-     * @param string|array  $columns Column name(s). Defaults to ['created_at', 'updated_at']
+     * @param  string             $table
+     * @param  string|array|null  $columns  Column name(s). Defaults to ['created_at', 'updated_at']
      */
-    public function convertTimestamps($table, $columns = null)
+    public function convertTimestamps(string $table, string|array $columns = null): void
     {
         if ($this->driver != 'mysql') {
             return;
@@ -212,7 +195,7 @@ class Dongle
     /**
      * Used to disable strict mode during migrations
      */
-    public function disableStrictMode()
+    public function disableStrictMode(): void
     {
         if ($this->driver != 'mysql') {
             return;
@@ -228,18 +211,16 @@ class Dongle
 
     /**
      * Returns the driver name as a string, eg: pgsql
-     * @return string
      */
-    public function getDriver()
+    public function getDriver(): string
     {
         return $this->driver;
     }
 
     /**
      * Get the table prefix.
-     * @return string
      */
-    public function getTablePrefix()
+    public function getTablePrefix(): string
     {
         return $this->db->getTablePrefix();
     }
